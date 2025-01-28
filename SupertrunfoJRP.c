@@ -21,10 +21,10 @@ void gerar_dados_aleatorios(Dados matriz_dados[MAX_ESTADOS][MAX_CIDADES], const 
     for (int est = 0; est < MAX_ESTADOS; est++) {
         for (int cid = 0; cid < MAX_CIDADES; cid++) {
             strcpy(matriz_dados[est][cid].nome_pais, nome_pais);
-            matriz_dados[est][cid].populacao = 100000 + rand() % 900000;
-            matriz_dados[est][cid].area = (100000 + rand() % 900000) / 100.0;
-            matriz_dados[est][cid].pib = (100000 + rand() % 900000) / 100.0;
-            matriz_dados[est][cid].pontos_turisticos = 100000 + rand() % 900000;
+            matriz_dados[est][cid].populacao = 10000 + rand() % 500000;
+            matriz_dados[est][cid].area = (150 + rand() % 1200) / 100.0;
+            matriz_dados[est][cid].pib = (1000000 + rand() % 90000000) / 100.0;
+            matriz_dados[est][cid].pontos_turisticos = 2 + rand() % 10;
         }
         sprintf(matriz_dados[est][0].nome_estado, "%c", 'A' + est);
     }
