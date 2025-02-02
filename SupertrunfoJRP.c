@@ -1,9 +1,30 @@
+/*Este é o desafio super trunfo nível mestre por Juliana Rodrigues Procópio
+Procurei conhecer novas opções de comandos, loops para uma codificação mais limpa e tratativas de erros
+
+ETAPAS:
+
+1- Declaração de variáveis
+2- Imput de dados para as cartas
+    a- incluída a opção de input de dados manual ou aleatório para melhorar os testes do jogo e aumentar agilidade
+    b- incluída tratativa de erros para imput de dados não aceitáveis pelo sistema
+    c- Incluida a possibilidade de cadastro de vários países sob escolha do usuário
+3- Saída de dados: Código PAIS_ESTADO e cidade conforme instrução.
+    a- são apresentados todas as propriedades cadastradas
+    b- propriendades calculadas foram inseridas e são exibidas
+4- Jogo com dois jogadores:
+    a- Cada jogador coloca seu nome
+    b- O código de todas as cartas cadastradas aparecem para escolha do jogador
+    c- A partir das cartas escolhidas, é calculado o super poder
+    d- Exibido o resultado da carta com maior super poder e o nome do vencedor!
+*/
+
+//Declaração de bibliotecas
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-// Estrutura representando as propriedades de uma cidade
+// Imput de variáveis com as propriedades de uma cidade
 typedef struct {
     int populacao;
     float area;
@@ -13,17 +34,19 @@ typedef struct {
     float pib_per_capita;
 } Cidade;
 
-// Estrutura representando uma carta de cidade
+// Declaração de codigo para cada carta de cidade
 typedef struct {
     char codigo[20];
     Cidade propriedades;
 } Carta;
 
-// Função para calcular as propriedades derivadas
+// Função para calcular as propriedades de desnidade populacional e pib per capita
 void calcular_propriedades(Carta *carta) {
     carta->propriedades.densidade_populacional = carta->propriedades.populacao / carta->propriedades.area;
     carta->propriedades.pib_per_capita = carta->propriedades.pib / carta->propriedades.populacao;
 }
+
+// Verifica se a entrada de valores é correta. Se não, exibe mensagem e pede correção ao usuário
 
 // Função para validar entrada inteira
 int ler_inteiro(const char *mensagem, int min, int max) {
@@ -194,7 +217,7 @@ void jogar(int total_cartas, Carta *todas_cartas) {
 
 // Função principal
 int main() {
-    srand(time(NULL)); // Inicializa a semente para gerar números aleatórios
+    srand(time(NULL)); // Inicializa gerar números aleatórios
 
     Carta todas_cartas[1000];
     int total_cartas = 0;
