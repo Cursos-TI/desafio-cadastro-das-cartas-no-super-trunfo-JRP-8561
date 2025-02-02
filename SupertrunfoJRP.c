@@ -25,7 +25,7 @@ void gerar_dados_aleatorios(Dados matriz_dados[MAX_ESTADOS][MAX_CIDADES], const 
             matriz_dados[est][cid].populacao = 100000 + rand() % 900000;
             matriz_dados[est][cid].area = (100000 + rand() % 900000) / 100.0;
             matriz_dados[est][cid].pib = (100000 + rand() % 900000) / 100.0;
-            matriz_dados[est][cid].pontos_turisticos = 100000 + rand() % 900000;
+            matriz_dados[est][cid].pontos_turisticos = 1 + rand() % 29;
         }
         sprintf(matriz_dados[est][0].nome_estado, "%c", 'A' + est);
     }
