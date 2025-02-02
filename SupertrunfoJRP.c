@@ -3,194 +3,228 @@
 #include <string.h>
 #include <time.h>
 
-#define MAX_ESTADOS 8
-#define MAX_CIDADES 4
-#define MAX_PAÍSES 10
-#define MAX_JOGADORES 2
-
+// Estrutura representando as propriedades de uma cidade
 typedef struct {
-    char codigo[5];
     int populacao;
     float area;
     float pib;
     int pontos_turisticos;
     float densidade_populacional;
     float pib_per_capita;
+} Cidade;
+
+// Estrutura representando uma carta de cidade
+typedef struct {
+    char codigo[20];
+    Cidade propriedades;
 } Carta;
 
-typedef struct {
-    char nome[50];
-    Carta cartas[MAX_ESTADOS][MAX_CIDADES];
-} Pais;
-
-typedef struct {
-    char nome[50];
-    Carta carta_escolhida;
-    float super_poder;
-} Jogador;
-
+// Função para calcular as propriedades derivadas
 void calcular_propriedades(Carta *carta) {
-    if (carta->area > 0) {
-        carta->densidade_populacional = carta->populacao / carta->area;
-    } else {
-        carta->densidade_populacional = 0;
-    }
-    if (carta->populacao > 0) {
-        carta->pib_per_capita = carta->pib / carta->populacao;
-    } else {
-        carta->pib_per_capita = 0;
-    }
+    carta->propriedades.densidade_populacional = carta->propriedades.populacao / carta->propriedades.area;
+    carta->propriedades.pib_per_capita = carta->propriedades.pib / carta->propriedades.populacao;
 }
 
-void entrada_automatica(Carta cartas[MAX_ESTADOS][MAX_CIDADES]) {
-    srand(time(NULL));
-    for (int i = 0; i < MAX_ESTADOS; i++) {
-        for (int j = 0; j < MAX_CIDADES; j++) {
-            sprintf(cartas[i][j].codigo, "%c%02d", 'A' + i, j + 1);
-            cartas[i][j].populacao = rand() % 1000000 + 10000; // Entre 10k e 1M
-            cartas[i][j].area = (rand() % 5000 + 100) / 10.0;   // Entre 10.0 e 500.0 km²
-            cartas[i][j].pib = (rand() % 100000 + 1000) / 10.0; // Entre 100.0 e 10k milhões
-            cartas[i][j].pontos_turisticos = rand() % 20 + 1;   // Entre 1 e 20
-            calcular_propriedades(&cartas[i][j]);
-        }
-    }
-}
-
-void entrada_manual(Carta cartas[MAX_ESTADOS][MAX_CIDADES]) {
-    for (int i = 0; i < MAX_ESTADOS; i++) {
-        for (int j = 0; j < MAX_CIDADES; j++) {
-            sprintf(cartas[i][j].codigo, "%c%02d", 'A' + i, j + 1);
-            printf("\nCarta %s:\n", cartas[i][j].codigo);
-
-            printf("População: ");
-            while (scanf("%d", &cartas[i][j].populacao) != 1 || cartas[i][j].populacao < 0) {
-                printf("Entrada inválida! Insira um valor válido para população: ");
-                while (getchar() != '\n');
-            }
-
-            printf("Área (em km²): ");
-            while (scanf("%f", &cartas[i][j].area) != 1 || cartas[i][j].area <= 0) {
-                printf("Entrada inválida! Insira um valor válido para área: ");
-                while (getchar() != '\n');
-            }
-
-            printf("PIB (em milhões): ");
-            while (scanf("%f", &cartas[i][j].pib) != 1 || cartas[i][j].pib < 0) {
-                printf("Entrada inválida! Insira um valor válido para PIB: ");
-                while (getchar() != '\n');
-            }
-
-            printf("Número de pontos turísticos: ");
-            while (scanf("%d", &cartas[i][j].pontos_turisticos) != 1 || cartas[i][j].pontos_turisticos < 0) {
-                printf("Entrada inválida! Insira um valor válido para pontos turísticos: ");
-                while (getchar() != '\n');
-            }
-
-            calcular_propriedades(&cartas[i][j]);
-        }
-    }
-}
-
-void exibir_cartas(Carta cartas[MAX_ESTADOS][MAX_CIDADES], char *pais) {
-    printf("\nCartas disponíveis para o país: %s\n", pais);
-    for (int i = 0; i < MAX_ESTADOS; i++) {
-        for (int j = 0; j < MAX_CIDADES; j++) {
-            printf("Cidade %s - População: %d, Área: %.2f km², PIB: %.2f milhões, Pontos Turísticos: %d\n",
-                   cartas[i][j].codigo, cartas[i][j].populacao, cartas[i][j].area,
-                   cartas[i][j].pib, cartas[i][j].pontos_turisticos);
-        }
-    }
-}
-
-float calcular_super_poder(Carta carta) {
-    return carta.populacao + carta.area + carta.pib + carta.pontos_turisticos;
-}
-
-int main() {
-    Pais paises[MAX_PAÍSES];
-    int total_paises = 0, opcao;
-
-    printf("Bem-vindo ao Super Trunfo - Países!\n");
-
-    // Cadastro inicial dos países
-    do {
-        printf("\nInsira o nome do país: ");
-        while (getchar() != '\n'); // Limpa o buffer do stdin
-        fgets(paises[total_paises].nome, 50, stdin);
-        paises[total_paises].nome[strcspn(paises[total_paises].nome, "\n")] = '\0'; // Remove o caractere de nova linha
-
-        printf("\nEscolha o método de entrada de dados:\n");
-        printf("1 - Entrada manual\n");
-        printf("2 - Entrada automática (aleatória)\n");
-        printf("Opção: ");
-        while (scanf("%d", &opcao) != 1 || (opcao != 1 && opcao != 2)) {
-            printf("Entrada inválida! Escolha 1 para manual ou 2 para automática: ");
-            while (getchar() != '\n');
-        }
-
-        if (opcao == 1) {
-            entrada_manual(paises[total_paises].cartas);
+// Função para validar entrada inteira
+int ler_inteiro(const char *mensagem, int min, int max) {
+    int valor;
+    while (1) {
+        printf("%s", mensagem);
+        if (scanf("%d", &valor) == 1 && valor >= min && valor <= max) {
+            return valor;
         } else {
-            entrada_automatica(paises[total_paises].cartas);
+            printf("Entrada inválida. Por favor, insira um número entre %d e %d.\n", min, max);
+            while (getchar() != '\n'); // Limpa o buffer
         }
+    }
+}
 
-        exibir_cartas(paises[total_paises].cartas, paises[total_paises].nome);
-        total_paises++;
-
-        printf("\nDeseja cadastrar outro país? (1 - Sim, 0 - Não): ");
-        while (scanf("%d", &opcao) != 1 || (opcao != 0 && opcao != 1)) {
-            printf("Entrada inválida! Escolha 1 para Sim ou 0 para Não: ");
-            while (getchar() != '\n');
+// Função para validar entrada float
+float ler_float(const char *mensagem, float min, float max) {
+    float valor;
+    while (1) {
+        printf("%s", mensagem);
+        if (scanf("%f", &valor) == 1 && valor >= min && valor <= max) {
+            return valor;
+        } else {
+            printf("Entrada inválida. Por favor, insira um número entre %.2f e %.2f.\n", min, max);
+            while (getchar() != '\n'); // Limpa o buffer
         }
+    }
+}
 
-    } while (opcao == 1 && total_paises < MAX_PAÍSES);
-
-    // Configuração do jogo com 2 jogadores
-    Jogador jogadores[MAX_JOGADORES];
-    for (int i = 0; i < MAX_JOGADORES; i++) {
-        printf("\nJogador_%d, insira seu nome: ", i + 1);
-        while (getchar() != '\n');
-        fgets(jogadores[i].nome, 50, stdin);
-        jogadores[i].nome[strcspn(jogadores[i].nome, "\n")] = '\0';
-
-        printf("\n%s, escolha um país:\n", jogadores[i].nome);
-        for (int j = 0; j < total_paises; j++) {
-            printf("%d - %s\n", j + 1, paises[j].nome);
+// Função para validar entrada char
+char ler_char(const char *mensagem, const char *opcoes) {
+    char valor;
+    while (1) {
+        printf("%s", mensagem);
+        if (scanf(" %c", &valor) == 1 && strchr(opcoes, valor)) {
+            return valor;
+        } else {
+            printf("Entrada inválida. Por favor, insira uma das seguintes opções: %s\n", opcoes);
+            while (getchar() != '\n'); // Limpa o buffer
         }
+    }
+}
 
-        int pais_escolhido;
-        printf("Opção: ");
-        while (scanf("%d", &pais_escolhido) != 1 || pais_escolhido < 1 || pais_escolhido > total_paises) {
-            printf("Entrada inválida! Escolha um número entre 1 e %d: ", total_paises);
-            while (getchar() != '\n');
+// Função para cadastrar cidades manualmente
+void cadastrar_cidade_manual(Carta *carta) {
+    printf("\nInserir propriedades para a carta %s:\n", carta->codigo);
+
+    carta->propriedades.populacao = ler_inteiro("População: ", 1000, 100000000);
+    carta->propriedades.area = ler_float("Área (km2): ", 1, 100000);
+    carta->propriedades.pib = ler_float("PIB (bilhões): ", 0.1, 10000);
+    carta->propriedades.pontos_turisticos = ler_inteiro("Número de pontos turísticos: ", 0, 100);
+
+    calcular_propriedades(carta);
+}
+
+// Função para cadastrar cidades com valores aleatórios
+void cadastrar_cidade_aleatorio(Carta *carta) {
+    carta->propriedades.populacao = rand() % 1000000 + 1000; // População entre 1.000 e 1.000.000
+    carta->propriedades.area = (rand() % 5000) + 10;         // Área entre 10 e 5000 km2
+    carta->propriedades.pib = (rand() % 500) + 1;            // PIB entre 1 e 500 bilhões
+    carta->propriedades.pontos_turisticos = rand() % 10 + 1; // Pontos turísticos entre 1 e 10
+
+    calcular_propriedades(carta);
+}
+
+// Função para cadastrar estados e cidades
+void cadastrar_estados(char *pais, Carta cartas[8][4]) {
+    char estados[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+
+    int escolha = ler_inteiro("\nDeseja cadastrar manualmente ou gerar aleatoriamente para todas as cartas do país?\n1 - Manual\n2 - Aleatório\nEscolha: ", 1, 2);
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 4; j++) {
+            // Gera o código da carta
+            snprintf(cartas[i][j].codigo, sizeof(cartas[i][j].codigo), "%s_%c%02d", pais, estados[i], j + 1);
+
+            if (escolha == 1) {
+                cadastrar_cidade_manual(&cartas[i][j]);
+            } else {
+                cadastrar_cidade_aleatorio(&cartas[i][j]);
+            }
         }
+    }
+}
 
-        printf("Escolha um estado de A a H: ");
-        char estado;
-        while (scanf(" %c", &estado) != 1 || estado < 'A' || estado > 'H') {
-            printf("Entrada inválida! Escolha um estado de A a H: ");
-            while (getchar() != '\n');
+// Função para exibir as cartas de um país
+void exibir_cartas(char *pais, Carta cartas[8][4]) {
+    printf("\nPropriedades do país %s:\n", pais);
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 4; j++) {
+            Carta *carta = &cartas[i][j];
+            printf("\nCarta: %s\n", carta->codigo);
+            printf("População: %d\n", carta->propriedades.populacao);
+            printf("Área: %.2f km2\n", carta->propriedades.area);
+            printf("PIB: %.2f bilhões\n", carta->propriedades.pib);
+            printf("Pontos Turísticos: %d\n", carta->propriedades.pontos_turisticos);
+            printf("Densidade Populacional: %.2f hab/km2\n", carta->propriedades.densidade_populacional);
+            printf("PIB per Capita: %.2f milhões\n", carta->propriedades.pib_per_capita);
         }
+    }
+}
 
-        int estado_index = estado - 'A';
+// Função para calcular o super poder de uma carta
+int calcular_super_poder(Carta *carta) {
+    return carta->propriedades.populacao + (int)carta->propriedades.area + (int)carta->propriedades.pib + carta->propriedades.pontos_turisticos;
+}
 
-        printf("Escolha uma cidade (1 a 4): ");
-        int cidade;
-        while (scanf("%d", &cidade) != 1 || cidade < 1 || cidade > 4) {
-            printf("Entrada inválida! Escolha uma cidade de 1 a 4: ");
-            while (getchar() != '\n');
-        }
+// Função para jogadores escolherem cartas e determinar o vencedor
+void jogar(int total_cartas, Carta *todas_cartas) {
+    char jogador1[50], jogador2[50];
+    char codigo_escolhido1[20], codigo_escolhido2[20];
+    Carta *carta1 = NULL, *carta2 = NULL;
 
-        int cidade_index = cidade - 1;
-        jogadores[i].carta_escolhida = paises[pais_escolhido - 1].cartas[estado_index][cidade_index];
-        jogadores[i].super_poder = calcular_super_poder(jogadores[i].carta_escolhida);
-        printf("\nVocê escolheu a carta: %s\n", jogadores[i].carta_escolhida.codigo);
+    printf("\nJogador 1, insira seu nome: ");
+    scanf("%s", jogador1);
+
+    printf("\nCartas disponíveis:\n");
+    for (int i = 0; i < total_cartas; i++) {
+        printf("%s ", todas_cartas[i].codigo);
     }
 
-    // Determinar o vencedor
-    int vencedor = (jogadores[0].super_poder > jogadores[1].super_poder) ? 0 : 1;
-    printf("\nO vencedor é %s com a carta %s e um Super Poder de %.2f!\n",
-           jogadores[vencedor].nome, jogadores[vencedor].carta_escolhida.codigo, jogadores[vencedor].super_poder);
+    while (carta1 == NULL) {
+        printf("\n%s, escolha uma carta pelo código: ", jogador1);
+        scanf("%s", codigo_escolhido1);
+        for (int i = 0; i < total_cartas; i++) {
+            if (strcmp(codigo_escolhido1, todas_cartas[i].codigo) == 0) {
+                carta1 = &todas_cartas[i];
+                break;
+            }
+        }
+        if (carta1 == NULL) {
+            printf("Código inválido. Tente novamente.\n");
+        }
+    }
+
+    printf("\nJogador 2, insira seu nome: ");
+    scanf("%s", jogador2);
+
+    while (carta2 == NULL) {
+        printf("\n%s, escolha uma carta pelo código: ", jogador2);
+        scanf("%s", codigo_escolhido2);
+        for (int i = 0; i < total_cartas; i++) {
+            if (strcmp(codigo_escolhido2, todas_cartas[i].codigo) == 0) {
+                carta2 = &todas_cartas[i];
+                break;
+            }
+        }
+        if (carta2 == NULL) {
+            printf("Código inválido. Tente novamente.\n");
+        }
+    }
+
+    int poder1 = calcular_super_poder(carta1);
+    int poder2 = calcular_super_poder(carta2);
+
+    printf("\nResultado:\n");
+    printf("%s escolheu a carta %s com super poder %d.\n", jogador1, carta1->codigo, poder1);
+    printf("%s escolheu a carta %s com super poder %d.\n", jogador2, carta2->codigo, poder2);
+
+    if (poder1 > poder2) {
+        printf("\n%s venceu!\n", jogador1);
+    } else if (poder2 > poder1) {
+        printf("\n%s venceu!\n", jogador2);
+    } else {
+        printf("\nEmpate!\n");
+    }
+}
+
+// Função principal
+int main() {
+    srand(time(NULL)); // Inicializa a semente para gerar números aleatórios
+
+    Carta todas_cartas[1000];
+    int total_cartas = 0;
+
+    char continuar;
+
+    do {
+        char pais[20];
+        printf("Digite o nome do país: ");
+        scanf("%s", pais);
+
+        Carta cartas[8][4];
+        cadastrar_estados(pais, cartas);
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 4; j++) {
+                todas_cartas[total_cartas++] = cartas[i][j];
+            }
+        }
+
+        exibir_cartas(pais, cartas);
+
+        continuar = ler_char("\nDeseja cadastrar mais um país? (y/n): ", "yYnN");
+
+    } while (continuar == 'y' || continuar == 'Y');
+
+    printf("\nInício do jogo!\n");
+    jogar(total_cartas, todas_cartas);
+
+    printf("\nQue legal este jogo!\n");
 
     return 0;
 }
