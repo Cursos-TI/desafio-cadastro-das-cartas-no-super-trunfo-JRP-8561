@@ -2,128 +2,137 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <ctype.h>
 
 #define MAX_ESTADOS 8
 #define MAX_CIDADES 4
-#define MAX_PAISES 10
 
 typedef struct {
-    char nome_pais[50];
-    char nome_estado[3];
-    char codigo_cidade[3];
+    char codigo[5];
     int populacao;
     float area;
     float pib;
     int pontos_turisticos;
-} Dados;
+    float densidade_populacional;
+    float pib_per_capita;
+} Carta;
 
-void gerar_dados_aleatorios(Dados matriz_dados[MAX_ESTADOS][MAX_CIDADES], const char* nome_pais) {
-    for (int est = 0; est < MAX_ESTADOS; est++) {
-        for (int cid = 0; cid < MAX_CIDADES; cid++) {
-            strcpy(matriz_dados[est][cid].nome_pais, nome_pais);
-            matriz_dados[est][cid].populacao = 100000 + rand() % 900000;
-            matriz_dados[est][cid].area = (100000 + rand() % 900000) / 100.0;
-            matriz_dados[est][cid].pib = (100000 + rand() % 900000) / 100.0;
-            matriz_dados[est][cid].pontos_turisticos = 1 + rand() % 29;
-        }
-        sprintf(matriz_dados[est][0].nome_estado, "%c", 'A' + est);
+void calcular_propriedades(Carta *carta) {
+    if (carta->area > 0) {
+        carta->densidade_populacional = carta->populacao / carta->area;
+    } else {
+        carta->densidade_populacional = 0;
+    }
+    if (carta->populacao > 0) {
+        carta->pib_per_capita = carta->pib / carta->populacao;
+    } else {
+        carta->pib_per_capita = 0;
     }
 }
 
-void exibir_dados(Dados paises[][MAX_ESTADOS][MAX_CIDADES], int total_paises) {
-    for (int p = 0; p < total_paises; p++) {
-        printf("Dados do país: %s\n", paises[p][0][0].nome_pais);
-        for (int est = 0; est < MAX_ESTADOS; est++) {
-            for (int cid = 0; cid < MAX_CIDADES; cid++) {
-                printf("%s_%s%02d: Populacao: %d, Area: %.2f, PIB: %.2f, Pontos Turisticos: %d\n", 
-                    paises[p][est][cid].nome_pais, paises[p][est][0].nome_estado, cid + 1,
-                    paises[p][est][cid].populacao, paises[p][est][cid].area,
-                    paises[p][est][cid].pib, paises[p][est][cid].pontos_turisticos);
-            }
+void entrada_automatica(Carta cartas[MAX_ESTADOS][MAX_CIDADES]) {
+    srand(time(NULL));
+    for (int i = 0; i < MAX_ESTADOS; i++) {
+        for (int j = 0; j < MAX_CIDADES; j++) {
+            sprintf(cartas[i][j].codigo, "%c%02d", 'A' + i, j + 1);
+            cartas[i][j].populacao = rand() % 1000000 + 10000; // Entre 10k e 1M
+            cartas[i][j].area = (rand() % 5000 + 100) / 10.0;   // Entre 10.0 e 500.0 km²
+            cartas[i][j].pib = (rand() % 100000 + 1000) / 10.0; // Entre 100.0 e 10k milhões
+            cartas[i][j].pontos_turisticos = rand() % 20 + 1;   // Entre 1 e 20
+            calcular_propriedades(&cartas[i][j]);
         }
-        printf("\n");
+    }
+    printf("Dados gerados automaticamente com sucesso!\n");
+}
+
+void entrada_manual(Carta cartas[MAX_ESTADOS][MAX_CIDADES]) {
+    for (int i = 0; i < MAX_ESTADOS; i++) {
+        for (int j = 0; j < MAX_CIDADES; j++) {
+            sprintf(cartas[i][j].codigo, "%c%02d", 'A' + i, j + 1);
+            printf("\nCadastro da cidade %s:\n", cartas[i][j].codigo);
+
+            printf("População (valor positivo): ");
+            while (scanf("%d", &cartas[i][j].populacao) != 1 || cartas[i][j].populacao <= 0) {
+                printf("Entrada inválida! Insira um valor positivo para a população: ");
+                while (getchar() != '\n'); // Limpa o buffer do stdin
+            }
+
+            printf("Área (km², valor positivo): ");
+            while (scanf("%f", &cartas[i][j].area) != 1 || cartas[i][j].area <= 0) {
+                printf("Entrada inválida! Insira um valor positivo para a área: ");
+                while (getchar() != '\n'); // Limpa o buffer do stdin
+            }
+
+            printf("PIB (em milhões, valor positivo): ");
+            while (scanf("%f", &cartas[i][j].pib) != 1 || cartas[i][j].pib <= 0) {
+                printf("Entrada inválida! Insira um valor positivo para o PIB: ");
+                while (getchar() != '\n'); // Limpa o buffer do stdin
+            }
+
+            printf("Número de pontos turísticos (valor entre 1 e 100): ");
+            while (scanf("%d", &cartas[i][j].pontos_turisticos) != 1 ||
+                   cartas[i][j].pontos_turisticos <= 0 || cartas[i][j].pontos_turisticos > 100) {
+                printf("Entrada inválida! Insira um valor entre 1 e 100 para os pontos turísticos: ");
+                while (getchar() != '\n'); // Limpa o buffer do stdin
+            }
+
+            calcular_propriedades(&cartas[i][j]);
+        }
     }
 }
 
-char obter_resposta(const char* mensagem) {
-    char resposta;
-    while (1) {
-        printf("%s (Y/N): ", mensagem);
-        getchar(); // Limpar o buffer
-        scanf("%c", &resposta);
-        resposta = toupper(resposta);
-        if (resposta == 'Y' || resposta == 'N') {
-            return resposta;
-        } else {
-            printf("Você deve responder apenas Y/N. Deseja tentar novamente? (Y/N): ");
-            getchar(); // Limpar o buffer
-            scanf("%c", &resposta);
-            resposta = toupper(resposta);
-            if (resposta == 'N') {
-                exit(1); // Sai do programa se o usuário não quiser tentar novamente
-            }
+void exibir_cartas(Carta cartas[MAX_ESTADOS][MAX_CIDADES], char *pais) {
+    printf("\nDados do país: %s\n", pais);
+    for (int i = 0; i < MAX_ESTADOS; i++) {
+        for (int j = 0; j < MAX_CIDADES; j++) {
+            printf("\nCidade %s (%s):\n", cartas[i][j].codigo, pais);
+            printf("População: %d\n", cartas[i][j].populacao);
+            printf("Área: %.2f km²\n", cartas[i][j].area);
+            printf("PIB: %.2f milhões\n", cartas[i][j].pib);
+            printf("Pontos turísticos: %d\n", cartas[i][j].pontos_turisticos);
+            printf("Densidade Populacional: %.2f hab/km²\n", cartas[i][j].densidade_populacional);
+            printf("PIB per Capita: %.2f milhões/hab\n", cartas[i][j].pib_per_capita);
         }
     }
 }
 
 int main() {
-    Dados paises[MAX_PAISES][MAX_ESTADOS][MAX_CIDADES];
-    int total_paises = 0;
-    char continuar = 'Y';
+    Carta cartas[MAX_ESTADOS][MAX_CIDADES];
+    char pais[50];
+    int opcao, continuar;
 
-    srand(time(NULL)); // Inicializa o gerador de números aleatórios
+    do {
+        printf("Bem-vindo ao sistema Super Trunfo - Países!\n");
+        printf("Insira o nome do país: ");
+        while (getchar() != '\n'); // Limpa o buffer do stdin
+        fgets(pais, 50, stdin);
+        pais[strcspn(pais, "\n")] = '\0'; // Remove o caractere de nova linha
 
-    while (continuar == 'Y' && total_paises < MAX_PAISES) {
-        // Entrada de dados do nome do país
-        printf("Digite o nome do país: ");
-        scanf("%s", paises[total_paises][0][0].nome_pais);
+        printf("\nEscolha o método de entrada de dados:\n");
+        printf("1 - Entrada manual\n");
+        printf("2 - Entrada automática (aleatória)\n");
+        printf("Opção: ");
+        
+        while (scanf("%d", &opcao) != 1 || (opcao != 1 && opcao != 2)) {
+            printf("Entrada inválida! Escolha 1 para manual ou 2 para automática: ");
+            while (getchar() != '\n'); // Limpa o buffer do stdin
+        }
 
-        // Pergunta se o preenchimento deve ser automático para todos os dados
-        char resposta_automatica = obter_resposta("Deseja preenchimento automático para o país");
-
-        if (resposta_automatica == 'Y') {
-            gerar_dados_aleatorios(paises[total_paises], paises[total_paises][0][0].nome_pais);
+        if (opcao == 1) {
+            entrada_manual(cartas);
         } else {
-            // Loop para os estados de A a H
-            for (int est = 0; est < MAX_ESTADOS; est++) {
-                sprintf(paises[total_paises][est][0].nome_estado, "%c", 'A' + est);
-
-                // Loop para as cidades de 1 a 4
-                for (int cid = 0; cid < MAX_CIDADES; cid++) {
-                    sprintf(paises[total_paises][est][cid].codigo_cidade, "%1d", cid + 1);
-
-                    // Solicita dados adicionais ao usuário para cada cidade
-                    printf("Digite a populacao da cidade %s_%s%02d: ",
-                           paises[total_paises][0][0].nome_pais, paises[total_paises][est][0].nome_estado, cid + 1);
-                    scanf("%d", &paises[total_paises][est][cid].populacao);
-
-                    printf("Digite a area da cidade %s_%s%02d: ",
-                           paises[total_paises][0][0].nome_pais, paises[total_paises][est][0].nome_estado, cid + 1);
-                    scanf("%f", &paises[total_paises][est][cid].area);
-
-                    printf("Digite o PIB da cidade %s_%s%02d: ",
-                           paises[total_paises][0][0].nome_pais, paises[total_paises][est][0].nome_estado, cid + 1);
-                    scanf("%f", &paises[total_paises][est][cid].pib);
-
-                    printf("Digite o numero de pontos turisticos da cidade %s_%s%02d: ",
-                           paises[total_paises][0][0].nome_pais, paises[total_paises][est][0].nome_estado, cid + 1);
-                    scanf("%d", &paises[total_paises][est][cid].pontos_turisticos);
-                }
-            }
+            entrada_automatica(cartas);
         }
 
-        // Incrementa o total de países cadastrados
-        total_paises++;
+        exibir_cartas(cartas, pais);
 
-        // Pergunta se deseja cadastrar mais
-        continuar = obter_resposta("Deseja cadastrar mais alguma entrada");
-
-        // Se o usuário responder "N", exibe todos os dados
-        if (continuar == 'N') {
-            exibir_dados(paises, total_paises);
+        printf("\nDeseja cadastrar outro país? (1 - Sim, 0 - Não): ");
+        while (scanf("%d", &continuar) != 1 || (continuar != 0 && continuar != 1)) {
+            printf("Entrada inválida! Escolha 1 para Sim ou 0 para Não: ");
+            while (getchar() != '\n'); // Limpa o buffer do stdin
         }
-    }
 
+    } while (continuar == 1);
+
+    printf("Encerrando o programa. Obrigado!\n");
     return 0;
 }
