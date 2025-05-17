@@ -1,16 +1,16 @@
-/*Este é o desafio super trunfo nível mestre por Juliana Rodrigues Procópio
+/*Este é o desafio super trunfo nível mestre, desenvolvido por Juliana Rodrigues Procópio
 Procurei conhecer novas opções de comandos, loops para uma codificação mais limpa e tratativas de erros
 
 ETAPAS:
 
 1- Declaração de variáveis
 2- Imput de dados para as cartas
-    a- incluída a opção de input de dados manual ou aleatório para melhorar os testes do jogo e aumentar agilidade
-    b- incluída tratativa de erros para imput de dados não aceitáveis pelo sistema
-    c- Incluida a possibilidade de cadastro de vários países sob escolha do usuário
+    a- incluí a opção de input de dados manual ou aleatório para melhorar os testes do jogo e aumentar agilidade (Responda 1 ou 2)
+    b- incluí tratativa de erros para imput de dados não aceitáveis pelo sistema
+    c- Incluí a possibilidade de cadastro de vários países sob escolha do usuário (Deseja cadastrar outro pais? Responda Y/N)
 3- Saída de dados: Código PAIS_ESTADO e cidade conforme instrução.
-    a- são apresentados todas as propriedades cadastradas
-    b- propriendades calculadas foram inseridas e são exibidas
+    a- todas as propriedades cadastradas são apresentadas
+    b- propriendades calculadas são exibidas
 4- Jogo com dois jogadores:
     a- Cada jogador coloca seu nome
     b- O código de todas as cartas cadastradas aparecem para escolha do jogador
@@ -165,10 +165,10 @@ void jogar(int total_cartas, Carta *todas_cartas) {
 
     printf("\nCartas disponíveis:\n");
     for (int i = 0; i < total_cartas; i++) {
-        printf("%s ", todas_cartas[i].codigo);
+        printf("%s\n ", todas_cartas[i].codigo);
     }
 
-    while (carta1 == NULL) {
+    while (carta1 == NULL)Méxi {
         printf("\n%s, escolha uma carta pelo código: ", jogador1);
         scanf("%s", codigo_escolhido1);
         for (int i = 0; i < total_cartas; i++) {
